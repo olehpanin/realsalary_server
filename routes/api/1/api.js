@@ -1,12 +1,18 @@
-var express = require("express");
-var router = express.Router();
-var request = require("request");
-var cheerio = require("cheerio");
-var url = "http://www.minfin.com.ua/currency";
-var agent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)';
-var $;
+"use strict";
 
+let express = require("express");
+let router = express.Router();
+let request = require("request");
+let cheerio = require("cheerio");
+let url = "http://www.minfin.com.ua/currency";
+let agent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)';
+let $;
+let Db = require("../../../db/db.js");
+let db = new Db();
 
+new Db();
+new Db();
+new Db();
 
 router.get("/", function(req,res,next){
     request({
@@ -19,12 +25,12 @@ router.get("/", function(req,res,next){
 
             $ = cheerio.load(body);
 
-            var block = $(".shortInfoBlock"),
+            let block = $(".shortInfoBlock"),
                 dollarExchangeTable = block.eq(0),
                 dollarBlackMarketSell = dollarExchangeTable.children().eq(2).children().eq(2).text(),
                 interbankMarketBuy = dollarExchangeTable.children().eq(3).children().eq(1).text();
 
-            var json = {
+            let json = {
                 blackMarket : {
                     sell : parseFloat( dollarBlackMarketSell )
                 },
@@ -33,13 +39,15 @@ router.get("/", function(req,res,next){
                 }
             };
 
+
+
             res.json(json);
         }
     });
 });
 
 function getResponseObject( dollarBlackMarketSell, interbankMarketBuy ){
-    return json = {
+    let json = {
         blackMarket : {
             sell : parseFloat( dollarBlackMarketSell )
         },
@@ -47,6 +55,8 @@ function getResponseObject( dollarBlackMarketSell, interbankMarketBuy ){
             buy : parseFloat( interbankMarketBuy )
         }
     };
+
+    return json;
 }
 
 module.exports = router;
