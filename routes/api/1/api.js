@@ -9,10 +9,7 @@ let agent = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.
 let $;
 let Db = require("../../../db/db.js");
 let db = new Db();
-
-new Db();
-new Db();
-new Db();
+let exchangeRatesSchema = require("../../../db/schemas/exchangeRatesSchema.js");
 
 router.get("/", function(req,res,next){
     request({
@@ -28,35 +25,32 @@ router.get("/", function(req,res,next){
             let block = $(".shortInfoBlock"),
                 dollarExchangeTable = block.eq(0),
                 dollarBlackMarketSell = dollarExchangeTable.children().eq(2).children().eq(2).text(),
+                dollarBlackMarketBuy = 0,
+                interbankMarketSell = 0,
                 interbankMarketBuy = dollarExchangeTable.children().eq(3).children().eq(1).text();
 
-            let json = {
-                blackMarket : {
-                    sell : parseFloat( dollarBlackMarketSell )
-                },
-                interbankMarket : {
-                    buy : parseFloat( interbankMarketBuy )
-                }
-            };
 
+            let exchangeRatesObject = exchangeRatesSchema.getObjectToSave( dollarBlackMarketSell, dollarBlackMarketBuy,
+                interbankMarketSell, interbankMarketBuy);
 
-
-            res.json(json);
+            db.saveExchangeRates( exchangeRatesObject );
+            res.json(exchangeRatesObject);
         }
     });
 });
 
-function getResponseObject( dollarBlackMarketSell, interbankMarketBuy ){
-    let json = {
-        blackMarket : {
-            sell : parseFloat( dollarBlackMarketSell )
-        },
-        interbankMarket : {
-            buy : parseFloat( interbankMarketBuy )
-        }
-    };
+router.get("/todayRates", function(req,res,next){
+    db.getTodayRates(function(obj){
+        res.json(obj);
+    });
+});
 
-    return json;
-}
+router.get("deleteAllExchangeRates", function(req,res,next){
+    db.deleteAllExchangeRates(function( data ){
+        console.log("success ", data);
+    }, function( data ){
+        console.error("error ", data);
+    })
+});
 
 module.exports = router;
